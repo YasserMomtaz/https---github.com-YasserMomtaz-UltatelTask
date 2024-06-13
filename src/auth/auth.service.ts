@@ -13,7 +13,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(username: string, email: string, password: string): Promise<string> {
+  async register(username: string, email: string, password: string): Promise<any> {
     try {
       const userExists = await this.userRepository.findOne({ where: [{ username }, { email }] });
       if (userExists) {
@@ -23,7 +23,7 @@ export class AuthService {
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = this.userRepository.create({ username, email, password: hashedPassword });
       await this.userRepository.save(newUser);
-      return 'User registered successfully';
+      return {msg:'User registered successfully'};
     } catch (error) {
         if (error instanceof ConflictException) {
             throw error;
@@ -32,7 +32,7 @@ export class AuthService {
     }
   }
 
-  async login(username: string, password: string): Promise<string> {
+  async login(username: string, password: string): Promise<any> {
     try {
       const user = await this.userRepository.findOne({ where: [{ username }] });
       if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -40,7 +40,8 @@ export class AuthService {
       }
 
       const payload = { username: user.username, email: user.email };
-      return await this.jwtService.signAsync(payload);
+      const token = await this.jwtService.signAsync(payload);
+      return {access_token:token};
     } catch (error) {
         if (error instanceof UnauthorizedException) {
             throw error;

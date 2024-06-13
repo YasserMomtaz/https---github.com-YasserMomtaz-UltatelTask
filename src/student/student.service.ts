@@ -91,7 +91,7 @@ export class StudentService {
         qb.andWhere('student.country LIKE :country', { country: `%${query.country}%` });
       }
       if (query.gender) {
-        qb.andWhere('student.gender LIKE :gender', { gender: `%${query.gender}%` });
+        qb.andWhere('LOWER(student.gender) REGEXP  LOWER(:gender)', { gender: `\\b${query.gender}\\b` });
       }
     
       qb.skip((page - 1) * pageSize).take(pageSize);
